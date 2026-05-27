@@ -95,7 +95,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .mteam{display:flex;flex-direction:column;gap:4px;}
 .mteam.home{align-items:flex-start;}
 .mteam.away{align-items:flex-end;}
-.mflag{font-size:24px;line-height:1;}
+.mflag{line-height:1;width:32px;height:24px;display:flex;align-items:center;}
 .mname{font-size:12px;font-weight:700;color:var(--text);}
 .mteam.away .mname{text-align:right;}
 .sbox{display:flex;flex-direction:column;align-items:center;gap:3px;}
@@ -125,7 +125,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .gtbl td{padding:6px 4px;text-align:center;font-size:11px;font-weight:600;border-top:1px solid var(--border);}
 .gtbl td:first-child{text-align:left;padding-left:10px;}
 .trow{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:700;}
-.trow .fl{font-size:13px;}
+.trow .fl{width:18px;height:14px;display:flex;align-items:center;}
 .pts{color:var(--accent);font-weight:700;}
 .gtbl tbody tr:nth-child(1) td,.gtbl tbody tr:nth-child(2) td{background:rgba(34,197,94,.04);}
 .gtbl tbody tr:nth-child(1) td:first-child,.gtbl tbody tr:nth-child(2) td:first-child{border-left:3px solid rgba(34,197,94,.5);}
@@ -148,7 +148,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .koteam{display:flex;flex-direction:column;gap:3px;}
 .koteam.home{align-items:flex-start;}
 .koteam.away{align-items:flex-end;}
-.koflag{font-size:20px;line-height:1;}
+.koflag{line-height:1;width:27px;height:20px;display:flex;align-items:center;}
 .koname{font-size:11px;font-weight:700;color:var(--text);}
 .koteam.away .koname{text-align:right;}
 .kodesc{font-size:9px;color:var(--muted);}
@@ -159,6 +159,14 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 ::-webkit-scrollbar{width:0;}
 .empty{text-align:center;color:var(--muted);padding:30px 20px;font-size:13px;}
 .foot-note{text-align:center;color:var(--muted);font-size:10px;padding:16px 0 24px;}
+/* KO Legend */
+.ko-legend{border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;line-height:1.6;border:1px solid;}
+.ko-legend.pending{background:rgba(234,179,8,.05);border-color:rgba(234,179,8,.2);color:#a89030;}
+.ko-legend.inprogress{background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2);color:#7ab0e0;}
+.ko-legend.done{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.2);color:#4ade80;}
+.ko-legend strong{font-weight:700;color:inherit;}
+/* Provisional team name (leading but not confirmed) */
+.provisional{color:var(--yellow)!important;font-style:italic;}
 </style>
 </head>
 <body>
@@ -225,21 +233,27 @@ function etToArg(etDateLabel, etH, etM) {
 // ─────────────────────────────────────────────
 // FLAGS
 // ─────────────────────────────────────────────
+// ISO 3166-1 alpha-2 codes for FlagCDN
 const FLAGS = {
-  'Argentina':'🇦🇷','Algeria':'🇩🇿','Austria':'🇦🇹','Jordan':'🇯🇴',
-  'Brazil':'🇧🇷','Morocco':'🇲🇦','Haiti':'🇭🇹','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-  'France':'🇫🇷','Senegal':'🇸🇳','Iraq':'🇮🇶','Norway':'🇳🇴',
-  'Portugal':'🇵🇹','DR Congo':'🇨🇩','Uzbekistan':'🇺🇿','Colombia':'🇨🇴',
-  'England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Croatia':'🇭🇷','Ghana':'🇬🇭','Panama':'🇵🇦',
-  'Spain':'🇪🇸','Cape Verde':'🇨🇻','Saudi Arabia':'🇸🇦','Uruguay':'🇺🇾',
-  'Belgium':'🇧🇪','Egypt':'🇪🇬','Iran':'🇮🇷','New Zealand':'🇳🇿',
-  'Germany':'🇩🇪','Curacao':'🇨🇼','Ivory Coast':'🇨🇮','Ecuador':'🇪🇨',
-  'Netherlands':'🇳🇱','Japan':'🇯🇵','Sweden':'🇸🇪','Tunisia':'🇹🇳',
-  'USA':'🇺🇸','Paraguay':'🇵🇾','Australia':'🇦🇺','Turkiye':'🇹🇷',
-  'Canada':'🇨🇦','Bosnia':'🇧🇦','Qatar':'🇶🇦','Switzerland':'🇨🇭',
-  'Mexico':'🇲🇽','South Africa':'🇿🇦','South Korea':'🇰🇷','Czechia':'🇨🇿',
+  'Argentina':'ar','Algeria':'dz','Austria':'at','Jordan':'jo',
+  'Brazil':'br','Morocco':'ma','Haiti':'ht','Scotland':'gb-sct',
+  'France':'fr','Senegal':'sn','Iraq':'iq','Norway':'no',
+  'Portugal':'pt','DR Congo':'cd','Uzbekistan':'uz','Colombia':'co',
+  'England':'gb-eng','Croatia':'hr','Ghana':'gh','Panama':'pa',
+  'Spain':'es','Cape Verde':'cv','Saudi Arabia':'sa','Uruguay':'uy',
+  'Belgium':'be','Egypt':'eg','Iran':'ir','New Zealand':'nz',
+  'Germany':'de','Curacao':'cw','Ivory Coast':'ci','Ecuador':'ec',
+  'Netherlands':'nl','Japan':'jp','Sweden':'se','Tunisia':'tn',
+  'USA':'us','Paraguay':'py','Australia':'au','Turkiye':'tr',
+  'Canada':'ca','Bosnia':'ba','Qatar':'qa','Switzerland':'ch',
+  'Mexico':'mx','South Africa':'za','South Korea':'kr','Czechia':'cz',
 };
-const flag = t => FLAGS[t] || '🏳';
+// Returns an <img> tag using FlagCDN — works on all platforms including Windows
+const flag = (t, size=24) => {
+  const iso = FLAGS[t];
+  if (!iso) return `<span style="font-size:${size}px">🏳</span>`;
+  return `<img src="https://flagcdn.com/${iso}.svg" width="${size}" height="${Math.round(size*0.75)}" style="border-radius:2px;object-fit:cover;vertical-align:middle" alt="${t}" loading="lazy">`;
+};
 
 // ─────────────────────────────────────────────
 // MATCH DATA (ET times → will be converted to ARG)
@@ -554,7 +568,7 @@ function renderGroups() {
         <table class="gtbl"><tbody>
           ${teams.map(t=>`
             <tr class="${t.name==='Argentina'?'argrow':''}">
-              <td><div class="trow"><span class="fl">${flag(t.name)}</span>${t.name}</div></td>
+              <td><div class="trow"><span class="fl">${flag(t.name, 18)}</span>${t.name}</div></td>
               <td>${t.pj}</td><td>${t.pg}</td><td>${t.pe}</td><td>${t.pp}</td>
               <td class="pts">${t.pts}</td>
             </tr>`).join('')}
@@ -623,7 +637,7 @@ function renderMatches() {
             </div>
             <div class="mteams">
               <div class="mteam home">
-                <div class="mflag">${flag(m.h)}</div>
+                <div class="mflag">${flag(m.h, 24)}</div>
                 <div class="mname">${m.h}</div>
               </div>
               <div class="sbox">
@@ -635,7 +649,7 @@ function renderMatches() {
                 ${sLabel?`<div class="sstatus ${sClass}">${sLabel}</div>`:''}
               </div>
               <div class="mteam away">
-                <div class="mflag">${flag(m.a)}</div>
+                <div class="mflag">${flag(m.a, 24)}</div>
                 <div class="mname">${m.a}</div>
               </div>
             </div>
@@ -646,25 +660,200 @@ function renderMatches() {
 }
 
 // ─────────────────────────────────────────────
+// QUALIFIER CALCULATION
+// ─────────────────────────────────────────────
+const MATCHES_PER_GROUP = 6;
+
+function getGroupStandings(letter) {
+  const src = standingsData[letter];
+  if (!src || !src.length)
+    return GROUPS_STATIC[letter].map(name => ({name,pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,dg:0,pts:0}));
+  return [...src].sort((a,b) => b.pts-a.pts || b.dg-a.dg || b.gf-a.gf);
+}
+
+function groupMatchesPlayed(letter) {
+  const teams = GROUPS_STATIC[letter] || [];
+  let count = 0;
+  Object.entries(liveScores).forEach(([key, sc]) => {
+    if (sc.status !== 'STATUS_FINAL') return;
+    const [h, a] = key.split('|');
+    if (teams.includes(h) && teams.includes(a)) count++;
+  });
+  return count;
+}
+
+function allGroupsFinished() {
+  return Object.keys(GROUPS_STATIC).every(l => groupMatchesPlayed(l) >= MATCHES_PER_GROUP);
+}
+function someGroupsStarted() {
+  return Object.keys(GROUPS_STATIC).some(l => groupMatchesPlayed(l) > 0);
+}
+
+// Returns {name, confirmed} or null
+function getClassified(groupLetter, position) {
+  const standings = getGroupStandings(groupLetter);
+  const played = groupMatchesPlayed(groupLetter);
+  const team = standings[position - 1];
+  if (!team || team.pj === 0) return null;
+  const confirmed = played >= MATCHES_PER_GROUP;
+  return { name: team.name, confirmed };
+}
+
+// ─────────────────────────────────────────────
+// BEST THIRDS — real-time ranking
+// Returns array of up to 12 objects sorted by pts/DG/GF
+// each: {name, group, pts, dg, gf, pj, confirmed}
+// ─────────────────────────────────────────────
+function getAllThirds() {
+  const thirds = [];
+  Object.keys(GROUPS_STATIC).forEach(letter => {
+    const standings = getGroupStandings(letter);
+    const played = groupMatchesPlayed(letter);
+    const t = standings[2];
+    if (t && t.pj > 0) {
+      thirds.push({ ...t, group: letter, confirmed: played >= MATCHES_PER_GROUP });
+    }
+  });
+  return thirds.sort((a,b) => b.pts-a.pts || b.dg-a.dg || b.gf-a.gf);
+}
+
+function getBestThirds() {
+  return getAllThirds().slice(0, 8);
+}
+
+// ─────────────────────────────────────────────
+// FIFA 2026 THIRD-PLACE BRACKET ASSIGNMENT
+// The slot label in R32 lists which groups' thirds can fill it.
+// Once all groups finish, we know the exact 8 best thirds and
+// their source groups → we map each slot to the right team.
+//
+// Slot format: "3ro A/B/C/D/F" means: the best third from
+// among groups A, B, C, D, F (whichever qualified) goes here.
+// Since FIFA hasn't published the exact 2026 assignment table yet,
+// we use the logical approach: parse the groups listed in the slot,
+// intersect with the actual best-8 thirds' groups, pick the match.
+// ─────────────────────────────────────────────
+function resolveThirdSlot(slot) {
+  // slot like "3ro A/B/C/D/F"
+  const groupsInSlot = slot.replace('3ro ','').split('/');
+  const best8 = getBestThirds();
+  const best8groups = best8.map(t => t.group);
+
+  // Teams in the best 8 whose group is listed in this slot
+  const candidates = best8.filter(t => groupsInSlot.includes(t.group));
+
+  if (candidates.length === 0) return null;
+
+  // If all groups are finished we know for sure
+  const allDone = allGroupsFinished();
+
+  // Best candidate = first in sorted order (already sorted by pts/DG/GF)
+  const best = candidates[0];
+
+  // "Confirmed" only when all groups are done AND we have enough thirds
+  return { name: best.name, confirmed: allDone && best8.length >= 8, provisional: !allDone };
+}
+
+// ─────────────────────────────────────────────
+// RESOLVE ANY SLOT
+// ─────────────────────────────────────────────
+function resolveSlot(slot) {
+  const m1 = slot.match(/^1ro Grupo ([A-L])$/);
+  if (m1) return getClassified(m1[1], 1);
+  const m2 = slot.match(/^2do Grupo ([A-L])$/);
+  if (m2) return getClassified(m2[1], 2);
+  if (slot.startsWith('3ro')) return resolveThirdSlot(slot);
+  // KO stage winners/losers — not resolvable from group data
+  if (slot.startsWith('Gan.') || slot.startsWith('Perd.')) return null;
+  return null;
+}
+
+// ─────────────────────────────────────────────
+// BEST THIRDS SUMMARY — shown at top of Llaves tab
+// ─────────────────────────────────────────────
+function buildThirdsSummary() {
+  const all = getAllThirds();
+  if (all.length === 0) return '';
+
+  const rows = all.map((t, i) => {
+    const isQ = i < 8;
+    return `<tr style="opacity:${isQ?1:.45}">
+      <td style="padding:5px 8px;font-weight:700;color:${isQ?'var(--green)':'var(--muted)'}">${i+1}</td>
+      <td style="padding:5px 8px">
+        <div style="display:flex;align-items:center;gap:5px">
+          ${flag(t.name, 16)}
+          <span style="font-size:11px;font-weight:700">${t.name}</span>
+          <span style="font-size:9px;color:var(--muted);font-weight:600">Gr.${t.group}</span>
+        </div>
+      </td>
+      <td style="padding:5px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--accent)">${t.pts}</td>
+      <td style="padding:5px 8px;text-align:center;font-size:11px;color:var(--muted)">${t.dg>0?'+':''}${t.dg}</td>
+      <td style="padding:5px 8px;text-align:center;font-size:11px;color:var(--muted)">${t.gf}</td>
+      <td style="padding:5px 8px;text-align:center">
+        ${isQ
+          ? `<span style="font-size:9px;font-weight:700;color:var(--green);background:rgba(34,197,94,.1);padding:2px 6px;border-radius:10px">CLASIFICA</span>`
+          : `<span style="font-size:9px;color:var(--muted)">–</span>`}
+      </td>
+    </tr>`;
+  }).join('');
+
+  const allDone = allGroupsFinished();
+  const note = allDone
+    ? `<div style="font-size:10px;color:var(--green);text-align:center;padding:8px">✅ Clasificación de terceros confirmada</div>`
+    : `<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px">En tiempo real · Se actualiza a medida que terminan los partidos</div>`;
+
+  return `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:10px 12px;font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--accent);letter-spacing:1px;display:flex;justify-content:space-between;align-items:center">
+      Ranking Mejores 3ros
+      <span style="font-family:'Inter',sans-serif;font-size:9px;color:var(--muted);font-weight:600">Clasifican los 8 primeros</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="padding:5px 8px;font-size:9px;color:var(--muted);text-align:left">#</th>
+          <th style="padding:5px 8px;font-size:9px;color:var(--muted);text-align:left">Equipo</th>
+          <th style="padding:5px 8px;font-size:9px;color:var(--muted);text-align:center">Pts</th>
+          <th style="padding:5px 8px;font-size:9px;color:var(--muted);text-align:center">DG</th>
+          <th style="padding:5px 8px;font-size:9px;color:var(--muted);text-align:center">GF</th>
+          <th style="padding:5px 8px;font-size:9px;color:var(--muted);text-align:center"></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${note}
+  </div>`;
+}
+
+// ─────────────────────────────────────────────
 // KNOCKOUT RENDER
 // ─────────────────────────────────────────────
 function koMatchHTML(m) {
   const {time, date} = etToArg(m.d, m.et[0], m.et[1]);
-  const sc = m.hTeam && m.aTeam ? getScore(m.hTeam, m.aTeam) : null;
+
+  // Resolve teams from standings if not hardcoded
+  const hResolved = m.hTeam ? {name: m.hTeam, confirmed: true} : resolveSlot(m.h);
+  const aResolved = m.aTeam ? {name: m.aTeam, confirmed: true} : resolveSlot(m.a);
+
+  const hName = hResolved ? hResolved.name : m.h;
+  const aName = aResolved ? aResolved.name : m.a;
+  const hKnown = !!hResolved;
+  const aKnown = !!aResolved;
+  const hConfirmed = hResolved?.confirmed;
+  const aConfirmed = aResolved?.confirmed;
+
+  const hFlagHTML = hKnown ? flag(hResolved.name, 20) : '<span style="font-size:18px;opacity:.3">⬜</span>';
+  const aFlagHTML = aKnown ? flag(aResolved.name, 20) : '<span style="font-size:18px;opacity:.3">⬜</span>';
+
+  // Score only if both teams are real known teams
+  const sc = (hResolved && aResolved && m.hTeam && m.aTeam) ? getScore(hResolved.name, aResolved.name) : null;
   const hasScore = sc && sc.status !== 'STATUS_SCHEDULED';
   const isLive = sc && sc.status === 'STATUS_IN_PROGRESS';
   const sLabel = statusLabel(sc);
   const sClass = statusClass(sc);
-  const hFlag = m.hTeam ? flag(m.hTeam) : '⬜';
-  const aFlag = m.aTeam ? flag(m.aTeam) : '⬜';
-  const hName = m.hTeam || m.h;
-  const aName = m.aTeam || m.a;
-  const isKnown = !!m.hTeam;
-  return `<div class="kocard${m.arg?' arg':''}${isLive?' live-card':''}">
+
+  return `<div class="kocard${isLive?' live-card':''}">
     <div class="kotop">
-      <div>
-        <div class="konum">${m.n}${m.arg?' 🇦🇷':''}</div>
-      </div>
+      <div><div class="konum">${m.n}</div></div>
       <div class="kometaR">
         <div class="kotime${isLive?' live-time':''}">${isLive?'🔴 VIVO':time+' hs · '+date}</div>
         <div class="kovenue">${m.v}</div>
@@ -672,8 +861,8 @@ function koMatchHTML(m) {
     </div>
     <div class="koteams">
       <div class="koteam home">
-        <div class="koflag">${hFlag}</div>
-        <div class="koname${!isKnown?' kodesc':''}">${hName}</div>
+        <div class="koflag">${hFlagHTML}</div>
+        <div class="koname${!hKnown?' kodesc':''}${hKnown&&!hConfirmed?' provisional':''}">${hName}</div>
       </div>
       <div class="kosbox">
         <div class="kosnum${hasScore?' scored':''}">${hasScore?sc.hs:'-'}</div>
@@ -681,8 +870,8 @@ function koMatchHTML(m) {
         <div class="kosnum${hasScore?' scored':''}">${hasScore?sc.as:'-'}</div>
       </div>
       <div class="koteam away">
-        <div class="koflag">${aFlag}</div>
-        <div class="koname${!isKnown?' kodesc':''}" style="text-align:right">${aName}</div>
+        <div class="koflag">${aFlagHTML}</div>
+        <div class="koname${!aKnown?' kodesc':''}${aKnown&&!aConfirmed?' provisional':''}" style="text-align:right">${aName}</div>
       </div>
     </div>
     ${sLabel?`<div style="text-align:center;font-size:10px;font-weight:700;color:var(--${sClass==='live'?'red':'muted'});margin-top:6px;text-transform:uppercase">${sLabel}</div>`:''}
@@ -697,13 +886,37 @@ function koSection(title, dates, matches) {
 }
 
 function renderKO() {
+  const started = someGroupsStarted();
+  const allDone = allGroupsFinished();
+
+  let legend = '';
+  if (!started) {
+    legend = `<div class="ko-legend pending">
+      ⏳ Las llaves se irán completando a medida que avance la fase de grupos.<br>
+      Las llaves quedarán <strong>confirmadas</strong> una vez que terminen todos los partidos de la fase de grupos el <strong>27 de junio</strong>.
+    </div>`;
+  } else if (!allDone) {
+    legend = `<div class="ko-legend inprogress">
+      🔄 Las llaves se están actualizando en tiempo real según los resultados.<br>
+      Quedarán <strong>confirmadas definitivamente</strong> al terminar toda la fase de grupos el <strong>27 de junio</strong>.
+    </div>`;
+  } else {
+    legend = `<div class="ko-legend done">
+      ✅ Fase de grupos finalizada — todas las llaves están <strong>confirmadas</strong>.
+    </div>`;
+  }
+
+  const thirdsSummary = someGroupsStarted() ? buildThirdsSummary() : '';
+
   document.getElementById('koContainer').innerHTML =
+    legend +
+    thirdsSummary +
     koSection('16vos de Final', '28 Jun – 3 Jul', R32) +
     koSection('Octavos de Final', '4 – 7 Jul', R16) +
     koSection('Cuartos de Final', '9 – 11 Jul', QF) +
     koSection('Semifinales', '14 – 15 Jul', SF) +
     koSection('3er Puesto & Final', '18 – 19 Jul', FINALS) +
-    '<div class="foot-note">Cruces confirmados al finalizar grupos (27 Jun) · Horarios en Argentina (UTC-3)</div>';
+    '<div class="foot-note">Horarios en Argentina (UTC-3) · Fuente: ESPN</div>';
 }
 
 // ─────────────────────────────────────────────

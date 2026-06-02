@@ -889,15 +889,15 @@ function showToast(msg) {
   setTimeout(()=>t.remove(), 3500);
 }
 
-
-  // Simple PIN protection
+function toggleAdmin() {
+  const m = document.getElementById('adminModal');
+  if (m && m.style.display === 'flex') { m.style.display = 'none'; return; }
   const pin = prompt('PIN admin:');
   if (pin === 'mundial2026') {
-    m.style.display = 'flex';
+    if(m) m.style.display = 'flex';
   } else if (pin !== null) {
     alert('PIN incorrecto');
   }
-}
 }
 function updateCalBtnLabel() {
   const btn = document.getElementById('calBtn');
